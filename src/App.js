@@ -1,25 +1,40 @@
-import logo from './logo.svg';
 import './App.css';
+import Form from './Components/Common/Form.js'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from 'react';
+import { app } from './firebase-config';
+import { getAuth, /* signInWithEmailAndPassword, */ createUserWithEmailAndPassword } from 'firebase/auth'
+
 
 function App() {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('')
+
+  const handleAction = (id) => {
+    const authentication = getAuth();
+    if (id === 2) {
+      createUserWithEmailAndPassword(authentication, email, password)
+      .then((response) => {
+        console.log(response)
+    })
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+      <>
+          <Routes>
+            <Route path='/login' element={<Form title="Login" setEmail={setEmail} setPassword={setPassword} handleAction={() => handleAction(1)}/>}/>
+            <Route path='/register' element={<Form title="Register" setEmail={setEmail} setPassword={setPassword} handleAction={() => handleAction(2)}/>}/>
+          </Routes>
+        </>
+      </div>
+    </Router>
   );
 }
 
 export default App;
+
+//How to Store the Token in Session Storage to be continued
