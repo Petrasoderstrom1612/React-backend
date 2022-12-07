@@ -1,40 +1,83 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from 'react';
 import './App.css';
-import Form from './Components/Common/Form.js'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from 'react';
+import Form from './Components/Common/Form';
+import Home from './Components/Home';
+import {
+  Routes,
+  Route,
+  useNavigate
+} from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
 import { app } from './firebase-config';
-import { getAuth, /* signInWithEmailAndPassword, */ createUserWithEmailAndPassword } from 'firebase/auth'
-
-
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 function App() {
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('')
+  const [password, setPassword] = useState('');
+
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    let authToken = sessionStorage.getItem('Auth Token')
+
+    if (authToken) {
+      navigate('/home')
+    }
+  }, [])
 
   const handleAction = (id) => {
     const authentication = getAuth();
-    if (id === 2) {
+    if (id === "register") {
       createUserWithEmailAndPassword(authentication, email, password)
-      .then((response) => {
-        console.log(response)
-    })
+        .then((response) => {
+          navigate('/home')
+          sessionStorage.setItem('Auth Token', response._tokenResponse.refreshToken)
+        })
+    }
+    if (id === "login") {
+      signInWithEmailAndPassword(authentication, email, password)
+        .then((response) => {
+          navigate('/home')
+          sessionStorage.setItem('Auth Token', response._tokenResponse.refreshToken)
+        })
     }
   }
 
   return (
-    <Router>
-      <div className="App">
+    <div className="App">
       <>
-          <Routes>
-            <Route path='/login' element={<Form title="Login" setEmail={setEmail} setPassword={setPassword} handleAction={() => handleAction(1)}/>}/>
-            <Route path='/register' element={<Form title="Register" setEmail={setEmail} setPassword={setPassword} handleAction={() => handleAction(2)}/>}/>
-          </Routes>
-        </>
-      </div>
-    </Router>
+        <Routes>
+          <Route
+            path='/login'
+            element={
+              <Form
+                title="Login"
+                setEmail={setEmail}
+                setPassword={setPassword}
+                handleAction={() => handleAction("login")}
+              />}
+          />
+          <Route
+            path='/register'
+            element={
+              <Form
+                title="Register"
+                setEmail={setEmail}
+                setPassword={setPassword}
+                handleAction={() => handleAction("register")}
+              />}
+          />
+
+          <Route
+            path='/home'
+            element={
+              <Home />}
+          />
+        </Routes>
+      </>
+    </div>
   );
 }
 
 export default App;
-
-//How to Store the Token in Session Storage to be continued
